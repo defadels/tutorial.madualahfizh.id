@@ -23,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Courses
     Route::resource('courses', AdminCourseController::class);
     Route::post('courses/{course}/publish', [AdminCourseController::class, 'publish'])->name('courses.publish');
