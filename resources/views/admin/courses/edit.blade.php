@@ -9,6 +9,25 @@
     .sortable-ghost {
         opacity: 0.4;
     }
+    .youtube-preview {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        margin-top: 10px;
+    }
+    .youtube-preview iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
+    }
+    .youtube-preview.hidden {
+        display: none;
+    }
 </style>
 @endpush
 
@@ -125,11 +144,39 @@
                                         <button type="button" 
                                                 class="btn btn-sm btn-info"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#editModuleModal"
+                                                data-bs-target="#editModuleModal{{ $module->id }}"
                                                 data-module-id="{{ $module->id }}"
                                                 data-module-title="{{ $module->title }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
+
+                                        <!-- Modal Edit Modul -->
+                                        <div class="modal fade" id="editModuleModal{{ $module->id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="POST" action="{{ route('admin.modules.update', $module->id) }}">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Edit Modul</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="editModuleTitle" class="form-label">Judul Modul</label>
+                                                                <input type="text" value="{{ old('title', $module->title) }}" class="form-control" id="editModuleTitle" name="title" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
                                         <form action="{{ route('admin.modules.destroy', $module) }}" 
                                               method="POST" 
                                               class="d-inline"
@@ -148,10 +195,61 @@
                                         <button type="button" 
                                                 class="btn btn-primary btn-sm"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#addLessonModal"
+                                                data-bs-target="#addLessonModal{{ $module->id }}"
                                                 data-module-id="{{ $module->id }}">
                                             <i class="fas fa-plus"></i> Tambah Pelajaran
                                         </button>
+
+                                        <!-- Modal Tambah Pelajaran -->
+                                        <div class="modal fade" id="addLessonModal{{ $module->id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <form action="{{ route('admin.lessons.store', $module->id) }}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Tambah Pelajaran Baru</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="lessonTitle" class="form-label">Judul Pelajaran <span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control" id="lessonTitle" name="title" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="summernote" class="form-label">Deskripsi</label>
+                                                                <textarea class="form-control" id="summernote" name="description" rows="3"></textarea>
+                                                                {{-- <small class="text-muted">Jelaskan apa yang akan dipelajari dalam pelajaran ini.</small> --}}
+                                                                {{-- <div id="summernote"></div> --}}
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="lessonVideo" class="form-label">Video URL</label>
+                                                                <input type="text" 
+                                                                    class="form-control" 
+                                                                    placeholder="Contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+                                                                    id="lessonVideo" 
+                                                                    name="video_url"
+                                                                    onchange="previewYouTubeVideo(this, 'videoPreview')">
+                                                                <small class="text-muted">Masukkan URL video YouTube</small>
+                                                                <div id="videoPreview" class="youtube-preview hidden"></div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="lessonDuration" class="form-label">Durasi</label>
+                                                                <input type="text" 
+                                                                    placeholder="Contoh: 1 jam 12 menit" 
+                                                                    class="form-control" 
+                                                                    id="lessonDuration" 
+                                                                    name="duration">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     <div class="list-group lesson-list" data-module-id="{{ $module->id }}">
                                         @foreach($module->lessons->sortBy('order') as $lesson)
@@ -165,13 +263,68 @@
                                                     <button type="button" 
                                                             class="btn btn-sm btn-info"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#editLessonModal"
+                                                            data-bs-target="#editLessonModal{{ $lesson->id }}"
                                                             data-lesson-id="{{ $lesson->id }}"
                                                             data-lesson-title="{{ $lesson->title }}"
                                                             data-lesson-description="{{ $lesson->description }}"
+                                                            data-lesson-video-url="{{ $lesson->video_url }}"
                                                             data-lesson-duration="{{ $lesson->duration }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
+                                                    
+                                                    <!-- Modal Edit Pelajaran -->
+                                                    <div class="modal fade" id="editLessonModal{{ $lesson->id }}" tabindex="-1">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <form method="POST" action="{{ route('admin.lessons.update', $lesson->id) }}">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Edit Pelajaran</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="mb-3">
+                                                                            <label for="editLessonTitle" class="form-label">Judul Pelajaran <span class="text-danger">*</span></label>
+                                                                            <input type="text" value="{{ old('title', $lesson->title) }}" class="form-control" id="editLessonTitle" name="title" required>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label for="summernote" class="form-label">Deskripsi</label>
+                                                                            <textarea class="form-control" id="summernote" name="description" rows="3">{{ old('description', $lesson->description) }}</textarea>
+                                                                            {{-- <div id="summernote"></div> --}}
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label for="editLessonVideo" class="form-label">Video URL</label>
+                                                                            <input type="text" 
+                                                                                class="form-control" 
+                                                                                placeholder="Contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+                                                                                id="editLessonVideo" 
+                                                                                name="video_url"
+                                                                                value="{{ old('video_url', $lesson->video_url) }}"
+                                                                                onchange="previewYouTubeVideo(this, 'editVideoPreview')">
+                                                                            <small class="text-muted">Masukkan URL video YouTube</small>
+                                                                            <div id="editVideoPreview" class="youtube-preview hidden"></div>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label for="editLessonDuration" class="form-label">Durasi</label>
+                                                                            <input type="text" 
+                                                                                placeholder="Contoh: 1 jam 12 menit" 
+                                                                                class="form-control" 
+                                                                                id="editLessonDuration" 
+                                                                                value="{{ old('duration', $lesson->duration) }}"
+                                                                                name="duration">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                        <button type="submit" class="btn btn-primary">Simpan</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
                                                     <form action="{{ route('admin.lessons.destroy', $lesson) }}" 
                                                           method="POST" 
                                                           class="d-inline"
@@ -225,126 +378,46 @@
     </div>
 </div>
 
-<!-- Modal Edit Modul -->
-<div class="modal fade" id="editModuleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editModuleForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Modul</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="editModuleTitle" class="form-label">Judul Modul</label>
-                        <input type="text" class="form-control" id="editModuleTitle" name="title" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
-<!-- Modal Tambah Pelajaran -->
-<div class="modal fade" id="addLessonModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form id="addLessonForm" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Pelajaran Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="lessonTitle" class="form-label">Judul Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="lessonTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lessonDescription" class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="lessonDescription" name="description" rows="3"></textarea>
-                        <small class="text-muted">Jelaskan apa yang akan dipelajari dalam pelajaran ini.</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lessonVideo" class="form-label">Video</label>
-                        <input type="file" class="form-control" id="lessonVideo" name="video" accept="video/*" onchange="previewVideo(this, 'videoPreview')">
-                        <small class="text-muted">Format: MP4, MOV, AVI. Ukuran maksimal: 100MB</small>
-                        <div id="videoPreview" class="mt-2 d-none">
-                            <video controls style="max-width: 100%; max-height: 300px;">
-                                <source src="" type="video/mp4">
-                                Browser Anda tidak mendukung tag video.
-                            </video>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lessonDuration" class="form-label">Durasi (detik)</label>
-                        <input type="number" class="form-control" id="lessonDuration" name="duration">
-                        <small class="text-muted">Akan terisi otomatis saat memilih video</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Edit Pelajaran -->
-<div class="modal fade" id="editLessonModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form id="editLessonForm" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Pelajaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="editLessonTitle" class="form-label">Judul Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="editLessonTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLessonDescription" class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="editLessonDescription" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLessonVideo" class="form-label">Video Baru</label>
-                        <input type="file" class="form-control" id="editLessonVideo" name="video" accept="video/*" onchange="previewVideo(this, 'editVideoPreview')">
-                        <small class="text-muted">Biarkan kosong jika tidak ingin mengubah video</small>
-                        <div id="editVideoPreview" class="mt-2 d-none">
-                            <video controls style="max-width: 100%; max-height: 300px;">
-                                <source src="" type="video/mp4">
-                                Browser Anda tidak mendukung tag video.
-                            </video>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLessonDuration" class="form-label">Durasi (detik)</label>
-                        <input type="number" class="form-control" id="editLessonDuration" name="duration">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
 <script>
+      $('#summernote').summernote({
+        // placeholder: 'Hello Bootstrap 5',
+        tabsize: 2,
+        height: 100
+      });
+
+// Fungsi untuk mengekstrak video ID dari URL YouTube
+function getYouTubeVideoId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// Fungsi untuk preview video YouTube
+function previewYouTubeVideo(input, previewId) {
+    const preview = document.getElementById(previewId);
+    const url = input.value.trim();
+    
+    if (url) {
+        const videoId = getYouTubeVideoId(url);
+        if (videoId) {
+            const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            preview.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+            preview.innerHTML = '';
+        }
+    } else {
+        preview.classList.add('hidden');
+        preview.innerHTML = '';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Inisialisasi Sortable untuk modul
     new Sortable(document.getElementById('moduleList'), {
@@ -413,29 +486,6 @@ document.addEventListener('DOMContentLoaded', function() {
         form.action = `{{ url('admin/modules') }}/${moduleId}/lessons`;
     });
 
-    // Fungsi untuk preview video
-    function previewVideo(input, previewId) {
-        const preview = document.getElementById(previewId);
-        const video = preview.querySelector('video');
-        
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const url = URL.createObjectURL(file);
-            
-            video.src = url;
-            preview.classList.remove('d-none');
-            
-            // Set durasi otomatis
-            video.onloadedmetadata = function() {
-                const durationInput = input.closest('.modal-content').querySelector('[name="duration"]');
-                durationInput.value = Math.round(video.duration);
-            };
-        } else {
-            preview.classList.add('d-none');
-            video.src = '';
-        }
-    }
-
     // Handler untuk modal edit pelajaran
     const editLessonModal = document.getElementById('editLessonModal');
     editLessonModal.addEventListener('show.bs.modal', function(event) {
@@ -443,31 +493,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const lessonId = button.dataset.lessonId;
         const lessonTitle = button.dataset.lessonTitle;
         const lessonDescription = button.dataset.lessonDescription;
+        const lessonVideoUrl = button.dataset.lessonVideoUrl;
         const lessonDuration = button.dataset.lessonDuration;
         
         const form = editLessonModal.querySelector('#editLessonForm');
         form.action = `{{ url('admin/lessons') }}/${lessonId}`;
         form.querySelector('#editLessonTitle').value = lessonTitle;
         form.querySelector('#editLessonDescription').value = lessonDescription;
+        form.querySelector('#editLessonVideo').value = lessonVideoUrl;
         form.querySelector('#editLessonDuration').value = lessonDuration;
         
-        // Reset video preview
-        const preview = document.getElementById('editVideoPreview');
-        preview.classList.add('d-none');
-        preview.querySelector('video').src = '';
+        // Preview video jika ada
+        if (lessonVideoUrl) {
+            previewYouTubeVideo(form.querySelector('#editLessonVideo'), 'editVideoPreview');
+        }
     });
 
-    // Reset form dan preview saat modal ditutup
+    // Reset form saat modal ditutup
     ['addLessonModal', 'editLessonModal'].forEach(modalId => {
         const modal = document.getElementById(modalId);
         modal.addEventListener('hidden.bs.modal', function() {
             const form = modal.querySelector('form');
             form.reset();
             
-            const preview = modal.querySelector('[id$="VideoPreview"]');
+            // Reset preview
+            const preview = modal.querySelector('.youtube-preview');
             if (preview) {
-                preview.classList.add('d-none');
-                preview.querySelector('video').src = '';
+                preview.classList.add('hidden');
+                preview.innerHTML = '';
             }
         });
     });

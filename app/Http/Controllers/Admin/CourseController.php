@@ -31,10 +31,13 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'thumbnail' => 'nullable|image|max:2048',
+            'is_published' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('thumbnail')) {
@@ -59,6 +62,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'thumbnail' => 'nullable|image|max:2048',
+            'is_published' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('thumbnail')) {

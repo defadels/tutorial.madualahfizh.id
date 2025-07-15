@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
@@ -25,12 +24,11 @@ class LessonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'video' => 'nullable|file|mimes:mp4,mov,avi|max:102400', // max 100MB
-            'duration' => 'nullable|integer|min:1',
+            'video_url' => 'nullable|string|url',
+            'duration' => 'nullable|string|max:100',
         ], [
-            'video.max' => 'Ukuran video tidak boleh lebih dari 100MB.',
-            'video.mimes' => 'Format video harus MP4, MOV, atau AVI.',
-            'duration.min' => 'Durasi harus lebih dari 0 detik.',
+            'video_url.url' => 'URL video tidak valid.',
+            'duration.max' => 'Durasi tidak boleh lebih dari 100 karakter.',
         ]);
 
         try {
@@ -38,29 +36,20 @@ class LessonController extends Controller
 
             $order = $module->lessons()->max('order') + 1;
             $lesson = $module->lessons()->create([
+                'module_id' => $module->id,
                 'title' => $validated['title'],
                 'description' => $validated['description'],
+                'video_url' => $validated['video_url'],
                 'duration' => $validated['duration'],
                 'order' => $order,
             ]);
 
-            if ($request->hasFile('video')) {
-                $path = $request->file('video')->store('videos', 'public');
-                $lesson->update(['video_url' => $path]);
-            }
-
             DB::commit();
 
-            return redirect()->route('admin.courses.edit', $module->course)
+            return redirect()->route('admin.courses.edit', $module->course_id)
                 ->with('success', 'Pelajaran berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Hapus file video jika ada error
-            if (isset($path)) {
-                Storage::disk('public')->delete($path);
-            }
-
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menambahkan pelajaran. Silakan coba lagi.')
                 ->withInput();
@@ -72,30 +61,22 @@ class LessonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'video' => 'nullable|file|mimes:mp4,mov,avi|max:102400', // max 100MB
-            'duration' => 'nullable|integer|min:1',
+            'video_url' => 'nullable|string|url',
+            'duration' => 'nullable|string|max:100',
+        ], [
+            'video_url.url' => 'URL video tidak valid.',
+            'duration.max' => 'Durasi tidak boleh lebih dari 100 karakter.',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $oldVideoUrl = $lesson->video_url;
-
             $lesson->update([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
+                'video_url' => $validated['video_url'],
                 'duration' => $validated['duration'],
             ]);
-
-            if ($request->hasFile('video')) {
-                $path = $request->file('video')->store('videos', 'public');
-                $lesson->update(['video_url' => $path]);
-
-                // Hapus video lama jika ada
-                if ($oldVideoUrl) {
-                    Storage::disk('public')->delete($oldVideoUrl);
-                }
-            }
 
             DB::commit();
 
@@ -103,12 +84,6 @@ class LessonController extends Controller
                 ->with('success', 'Pelajaran berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Hapus file video baru jika ada error
-            if (isset($path)) {
-                Storage::disk('public')->delete($path);
-            }
-
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui pelajaran. Silakan coba lagi.')
                 ->withInput();
@@ -119,11 +94,6 @@ class LessonController extends Controller
     {
         try {
             $course = $lesson->module->course;
-            
-            if ($lesson->video_url) {
-                Storage::disk('public')->delete($lesson->video_url);
-            }
-            
             $lesson->delete();
 
             return redirect()->route('admin.courses.edit', $course)

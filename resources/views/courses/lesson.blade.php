@@ -18,38 +18,27 @@
     }
     .video-container {
         position: relative;
-        padding-bottom: 56.25%; /* 16:9 */
+        width: 100%;
         height: 0;
-        overflow: hidden;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
         background: #000;
         border-radius: 8px;
+        margin-bottom: 20px;
     }
-    .video-container video {
+    .video-container iframe {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+        border: none;
+        border-radius: 8px;
     }
     .lesson-description {
         background: #f8f9fa;
         padding: 20px;
         border-radius: 8px;
         margin-top: 20px;
-    }
-    .progress-container {
-        position: relative;
-        height: 5px;
-        background: #e9ecef;
-        margin-bottom: 10px;
-        border-radius: 5px;
-    }
-    .progress-bar {
-        position: absolute;
-        height: 100%;
-        background: #0d6efd;
-        border-radius: 5px;
-        transition: width 0.3s ease;
     }
 </style>
 @endpush
@@ -94,7 +83,7 @@
                                                         </div>
                                                         @if($moduleLesson->duration)
                                                             <small class="text-muted">
-                                                                {{ gmdate('i:s', $moduleLesson->duration) }}
+                                                                {{ $moduleLesson->duration }}
                                                             </small>
                                                         @endif
                                                     </div>
@@ -126,21 +115,42 @@
                     <h1 class="h2 mb-4">{{ $lesson->title }}</h1>
 
                     @if($lesson->video_url)
-                        <div class="video-container mb-4">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: 0%"></div>
-                            </div>
-                            <video id="lessonVideo" controls controlsList="nodownload">
-                                <source src="{{ Storage::url($lesson->video_url) }}" type="video/mp4">
-                                Browser Anda tidak mendukung pemutaran video.
-                            </video>
+                        <div class="video-container">
+                            @php
+                                // Extract YouTube video ID
+                                $videoId = null;
+                                if (preg_match('/youtu\.be\/([^#\&\?]+)/', $lesson->video_url, $matches)) {
+                                    $videoId = $matches[1];
+                                } elseif (preg_match('/youtube\.com\/watch\?v=([^#\&\?]+)/', $lesson->video_url, $matches)) {
+                                    $videoId = $matches[1];
+                                }
+                            @endphp
+                            
+                            @if($videoId)
+                                <iframe src="https://www.youtube.com/embed/{{ $videoId }}" 
+                                        allowfullscreen 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                </iframe>
+                            @else
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                        <p>URL video tidak valid</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Video belum tersedia untuk pelajaran ini.
                         </div>
                     @endif
 
                     @if($lesson->description)
                         <div class="lesson-description">
                             <h5 class="mb-3">Tentang Pelajaran Ini</h5>
-                            {{ $lesson->description }}
+                            {!! nl2br(e($lesson->description)) !!}
                         </div>
                     @endif
 
@@ -196,31 +206,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const video = document.getElementById('lessonVideo');
-    if (video) {
-        const progressBar = document.querySelector('.progress-bar');
-        
-        video.addEventListener('timeupdate', function() {
-            const progress = (video.currentTime / video.duration) * 100;
-            progressBar.style.width = progress + '%';
-        });
-
-        // Simpan posisi terakhir video
-        video.addEventListener('pause', function() {
-            localStorage.setItem(`video_progress_${video.querySelector('source').src}`, video.currentTime);
-        });
-
-        // Muat posisi terakhir video
-        const lastPosition = localStorage.getItem(`video_progress_${video.querySelector('source').src}`);
-        if (lastPosition) {
-            video.currentTime = parseFloat(lastPosition);
-        }
-    }
-});
-</script>
-@endpush
 @endsection 
