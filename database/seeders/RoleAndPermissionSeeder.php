@@ -21,6 +21,7 @@ class RoleAndPermissionSeeder extends Seeder
             'edit courses',
             'delete courses',
             'publish courses',
+            'view published courses', // Permission khusus untuk member
             
             // Module permissions
             'create modules',
@@ -45,6 +46,6 @@ class RoleAndPermissionSeeder extends Seeder
         $adminRole->givePermissionTo($permissions);
 
         $memberRole = Role::create(['name' => 'member']);
-        $memberRole->givePermissionTo(['view courses']);
+        $memberRole->givePermissionTo(['view published courses']);
     }
 } 
