@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Dropdown Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Simple Dropdown Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Basic Bootstrap Dropdown</h3>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Click Me
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="log('Basic dropdown clicked!')">Action 1</a></li>
+                <li><a class="dropdown-item" href="#" onclick="log('Basic dropdown clicked!')">Action 2</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Navbar Style (Exact Copy from Laravel)</h3>
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="#">Laravel Test</a>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Administrator
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="log('Logout clicked!')">
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Manual JavaScript Dropdown</h3>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="manualBtn">
+                Manual Dropdown
+            </button>
+            <ul class="dropdown-menu" id="manualMenu">
+                <li><a class="dropdown-item" href="#" onclick="log('Manual dropdown clicked!')">Manual Action</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="log" id="log">
+        <strong>Console Log:</strong><br>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        function log(message) {
+            document.getElementById('log').innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+        }
+        
+        // Test 1: Auto-initialize Bootstrap dropdowns
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded');
+            
+            // Initialize all Bootstrap dropdowns
+            var dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            log('Found ' + dropdowns.length + ' dropdown elements');
+            
+            dropdowns.forEach(function(element, index) {
+                try {
+                    var dropdown = new bootstrap.Dropdown(element);
+                    log('Dropdown ' + index + ' initialized');
+                } catch (error) {
+                    log('Error initializing dropdown ' + index + ': ' + error.message);
+                }
+            });
+            
+            // Test 3: Manual dropdown
+            document.getElementById('manualBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                var menu = document.getElementById('manualMenu');
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                    log('Manual dropdown closed');
+                } else {
+                    menu.style.display = 'block';
+                    log('Manual dropdown opened');
+                }
+            });
+            
+            // Add click listeners to all dropdown toggles
+            document.querySelectorAll('.dropdown-toggle').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    log('Dropdown toggle clicked: ' + element.textContent.trim());
+                });
+            });
+        });
+        
+        // Test if Bootstrap is loaded
+        if (typeof bootstrap !== 'undefined') {
+            log('Bootstrap loaded successfully');
+        } else {
+            log('ERROR: Bootstrap not loaded!');
+        }
+        
+        // Test if jQuery is loaded
+        if (typeof $ !== 'undefined') {
+            log('jQuery loaded successfully');
+        } else {
+            log('ERROR: jQuery not loaded!');
+        }
+    </script>
+</body>
+</html>

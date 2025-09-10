@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Dropdown Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Final Dropdown Test</h1>
+    <p>This page tests the exact same setup as your Laravel app.</p>
+    
+    <div class="test-section">
+        <h3>Test: Navbar Dropdown (Exact Copy from Laravel)</h3>
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="#">Laravel Test</a>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Administrator
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="log('Logout clicked!', 'success')">
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="log" id="log">
+        <strong>Console Log:</strong><br>
+    </div>
+
+    <!-- Scripts - Same order as Laravel app -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        function log(message, type = '') {
+            var logDiv = document.getElementById('log');
+            var className = type ? ' class="' + type + '"' : '';
+            logDiv.innerHTML += '<div' + className + '>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        // Initialize dropdowns after DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded, initializing dropdowns...');
+            
+            // Wait a bit for all scripts to load
+            setTimeout(function() {
+                initializeDropdowns();
+            }, 100);
+        });
+        
+        function initializeDropdowns() {
+            log('Initializing dropdowns...');
+            
+            // Initialize all dropdowns
+            var dropdownElements = document.querySelectorAll('.dropdown-toggle');
+            log('Found dropdown elements: ' + dropdownElements.length);
+            
+            dropdownElements.forEach(function(element, index) {
+                log('Initializing dropdown ' + index + ': ' + element.textContent.trim());
+                try {
+                    // Destroy existing dropdown if any
+                    var existingDropdown = bootstrap.Dropdown.getInstance(element);
+                    if (existingDropdown) {
+                        existingDropdown.dispose();
+                    }
+                    
+                    // Create new dropdown
+                    var dropdown = new bootstrap.Dropdown(element, {
+                        autoClose: true,
+                        boundary: 'viewport'
+                    });
+                    log('Dropdown ' + index + ' initialized successfully', 'success');
+                } catch (error) {
+                    log('Error initializing dropdown ' + index + ': ' + error.message, 'error');
+                }
+            });
+            
+            // Add click event listeners
+            dropdownElements.forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    log('Dropdown clicked: ' + e.target.textContent.trim(), 'success');
+                });
+            });
+        }
+        
+        // Re-initialize on window load (fallback)
+        window.addEventListener('load', function() {
+            log('Window loaded, re-initializing dropdowns...');
+            initializeDropdowns();
+        });
+        
+        // Test if Bootstrap is loaded
+        if (typeof bootstrap !== 'undefined') {
+            log('Bootstrap loaded successfully', 'success');
+        } else {
+            log('ERROR: Bootstrap not loaded!', 'error');
+        }
+        
+        // Test if jQuery is loaded
+        if (typeof $ !== 'undefined') {
+            log('jQuery loaded successfully', 'success');
+        } else {
+            log('ERROR: jQuery not loaded!', 'error');
+        }
+    </script>
+</body>
+</html>
