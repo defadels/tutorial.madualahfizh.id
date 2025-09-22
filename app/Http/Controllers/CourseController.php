@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view published courses');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    //     $this->middleware('permission:view published courses');
+    // }
 
     public function index()
     {

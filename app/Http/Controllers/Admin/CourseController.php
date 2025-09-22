@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('permission:view courses');
-    //     $this->middleware('permission:create courses', ['only' => ['create', 'store']]);
-    //     $this->middleware('permission:edit courses', ['only' => ['edit', 'update']]);
-    //     $this->middleware('permission:delete courses', ['only' => ['destroy']]);
-    //     $this->middleware('permission:publish courses', ['only' => ['publish']]);
-    // }
+    public function __construct()
+    {
+        $this->middleware('permission:view courses');
+        $this->middleware('permission:create courses', ['only' => ['create', 'store']]);
+        $this->middleware('permission:edit courses', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:delete courses', ['only' => ['destroy']]);
+        $this->middleware('permission:publish courses', ['only' => ['publish']]);
+    }
 
     public function index()
     {
